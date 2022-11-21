@@ -1,4 +1,5 @@
 import fs from "fs";
+import axios from "axios";
 import Jimp = require("jimp");
 
 // filterImageFromURL
@@ -10,22 +11,28 @@ import Jimp = require("jimp");
 //    an absolute path to a filtered image locally saved file
 export async function filterImageFromURL(inputURL: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
-    Jimp.read(inputURL)
-      .then((photo) => {
-        const outpath =
-          "/tmp/filtered." + Math.floor(Math.random() * 2000) + ".jpg";
-        photo
-          .resize(256, 256) // resize
-          .quality(60) // set JPEG quality
-          .greyscale() // set greyscale
-          .write(__dirname + outpath, (img) => {
-            resolve(__dirname + outpath);
-          });
-      })
-      .catch((err) => {
-        console.error(err);
-        reject("Could not read image.");
-      });
+    axios({
+      method: "get",
+      url: inputURL,
+      responseType: "arraybuffer",
+    }).then(({ data: imageBuffer }) => {
+      Jimp.read(<Buffer>imageBuffer)
+        .then((photo) => {
+          const outpath =
+            "/tmp/filtered." + Math.floor(Math.random() * 2000) + ".jpg";
+          photo
+            .resize(256, 256) // resize
+            .quality(60) // set JPEG quality
+            .greyscale() // set greyscale
+            .write(__dirname + outpath, (img) => {
+              resolve(__dirname + outpath);
+            });
+        })
+        .catch((err) => {
+          console.error(err);
+          reject("Could not read image.");
+        });
+    });
   });
 }
 
