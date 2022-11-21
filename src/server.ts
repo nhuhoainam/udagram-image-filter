@@ -43,7 +43,6 @@ import { filterImageFromURL, deleteLocalFiles } from "./util/util";
       res.send("Invalid image URL!")
       return;
     }
-    console.log(image_url)
     try {
       let file = await filterImageFromURL(image_url);
       res.status(200).sendFile(file);
